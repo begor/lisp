@@ -1,9 +1,23 @@
+import operator
+
+
 def tokenize(program):
     """
     I: (+ 2 (- 4 2))
     O: [(, +, 2, (, -, 4, 2, ), )]
     """
     return program.replace(')', ' ) ').replace('(', ' ( ').split()
+
+
+def atomize(token):
+    try:
+        return int(token)
+    except ValueError:
+        try:
+            return float(token)
+        except ValueError:
+            return token
+
 
 def read(tokens):
     """
@@ -17,7 +31,6 @@ def read(tokens):
         tokens.pop(0)
         return l
 
-
     if not len(tokens):
         raise SyntaxError('Empty program')
 
@@ -28,7 +41,7 @@ def read(tokens):
     elif t == ')':
         raise SyntaxError()
     else:
-        return t
+        return atomize(t)
 
 
 def evaluate(exp):
@@ -37,33 +50,35 @@ def evaluate(exp):
     O: 4
     """
     operations = {
-        '+': lambda x, y: evaluate(x) + evaluate(y),
-        '-': lambda x, y: evaluate(x) - evaluate(y),
-        '*': lambda x, y: evaluate(x) * evaluate(y),
-        '/': lambda x, y: evaluate(x) / evaluate(y),
+        '+': operator.add,
+        '-': operator.sub,
+        '*': operator.mul,
+        '/': operator.truediv,
+        '>': operator.gt,
+        '<': operator.lt,
+        '>=': operator.ge,
+        '<=': operator.le,
+        '=': operator.eq,
     }
 
-    def function_call(function, *args):
+    def is_operation(exp):
+        return isinstance(exp, list) and exp[0] in operations
+
+    def function_call(exp):
+        function = operations[exp[0]]
+        args = [evaluate(x) for x in exp[1:]]
         return function(*args)
 
-    def atom(exp):
-        try:
-            return int(exp)
-        except ValueError:
-            try:
-                return float(exp)
-            except ValueError:
-                return exp
-
-
-    if exp[0] in operations:
-        return function_call(operations[exp[0]], exp[1], exp[2])
+    if is_operation(exp):
+        return function_call(exp)
     else:
-        return atom(exp)
+        return exp
+
 
 def parse(program):
     tokens = tokenize(program)
     ast = read(tokens)
+    print(ast)
     return ast
 
 if __name__ == '__main__':
