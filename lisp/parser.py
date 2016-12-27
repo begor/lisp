@@ -50,7 +50,7 @@ def evaluate(exp):
     O: 4
     """
     operations = {
-        '+': operator.add,
+        '+': lambda *args: sum(args),
         '-': operator.sub,
         '*': operator.mul,
         '/': operator.truediv,
@@ -69,6 +69,8 @@ def evaluate(exp):
         args = [evaluate(x) for x in exp[1:]]
         return function(*args)
 
+    if not exp:
+        return
     if is_operation(exp):
         return function_call(exp)
     else:
