@@ -78,7 +78,6 @@ def evaluate(exp):
 def parse(program):
     tokens = tokenize(program)
     ast = read(tokens)
-    print(ast)
     return ast
 
 if __name__ == '__main__':
