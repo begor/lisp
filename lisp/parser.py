@@ -1,4 +1,5 @@
 import operator
+from functools import reduce
 
 
 def tokenize(program):
@@ -52,7 +53,7 @@ def evaluate(exp):
     operations = {
         '+': lambda *args: sum(args),
         '-': operator.sub,
-        '*': operator.mul,
+        '*': lambda *args: reduce(operator.mul, args),
         '/': operator.truediv,
         '>': operator.gt,
         '<': operator.lt,
