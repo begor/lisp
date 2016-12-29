@@ -60,6 +60,9 @@ def evaluate(exp):
         '>=': operator.ge,
         '<=': operator.le,
         '=': operator.eq,
+        'cons': lambda *args: list(args),
+        'car': lambda alist: alist[0],
+        'cdr': lambda alist: alist[1]
     }
 
     def is_operation(exp):
