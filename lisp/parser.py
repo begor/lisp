@@ -1,5 +1,5 @@
 import operator
-from functools import reduce
+from functools import reduce, partial
 
 
 def tokenize(program):
@@ -45,11 +45,20 @@ def read(tokens):
         return atomize(t)
 
 
-def evaluate(exp):
+def evaluate(exp, env={}):
     """
     I: [+, 2, [-, 4, 2]]
     O: 4
     """
+    def let_expression(bindings, exp):
+        for name, value in bindings:
+            print("Name and value")
+            print(name)
+            print(value)
+            env[name] = evaluate(value, env)
+        return evaluate(exp, env)
+
+
     operations = {
         '+': lambda *args: sum(args),
         '-': operator.sub,
@@ -62,11 +71,19 @@ def evaluate(exp):
         '=': operator.eq,
         'cons': lambda *args: list(args),
         'car': lambda alist: alist[0],
-        'cdr': lambda alist: alist[1]
+        'cdr': lambda alist: alist[1],
+        'let': let_expression,
+        'value': lambda name: env[name]
     }
 
     def is_operation(exp):
         return isinstance(exp, list) and exp[0] in operations
+
+    def is_let(exp):
+        return isinstance(exp, list) and exp[0] == 'let'
+
+    def is_binding(exp):
+        return isinstance(exp, str)
 
     def function_call(exp):
         function = operations[exp[0]]
@@ -74,9 +91,13 @@ def evaluate(exp):
         return function(*args)
 
     if not exp:
-        return
-    if is_operation(exp):
+        return []
+    elif is_let(exp):
+        return let_expression(*exp[1:])
+    elif is_operation(exp):
         return function_call(exp)
+    elif is_binding(exp):
+        return env[exp]
     else:
         return exp
 
@@ -87,5 +108,5 @@ def parse(program):
     return ast
 
 if __name__ == '__main__':
-    ast = parse('(+ 2 (- 4 (* 2 1)))')
-    print(evaluate(ast))
+    ast = parse('(define x (cons 1 (cons 2 ()))) (value x)')
+    print(ast)

@@ -14,7 +14,9 @@ PROGRAM_2_AST = [
     ('(car (cons 1 (cons 2 ())))',
      ['car', ['cons', 1, ['cons', 2, []]]]),
     ('(cdr (cons 1 (cons 2 ())))',
-     ['cdr', ['cons', 1, ['cons', 2, []]]])
+     ['cdr', ['cons', 1, ['cons', 2, []]]]),
+    ('(let ((x (cons 1 (cons 2)))) (value x))',
+    ['let', [['x', ['cons', 1, ['cons', 2]]]], ['value', 'x']])
 ]
 
 
