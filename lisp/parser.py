@@ -61,8 +61,8 @@ def evaluate(exp, env={}):
 
     operations = {
         '+': lambda *args: sum(args),
-        '-': operator.sub,
         '*': lambda *args: reduce(operator.mul, args),
+        '-': operator.sub,
         '/': operator.truediv,
         '>': operator.gt,
         '<': operator.lt,
@@ -72,7 +72,6 @@ def evaluate(exp, env={}):
         'cons': lambda *args: list(args),
         'car': lambda alist: alist[0],
         'cdr': lambda alist: alist[1],
-        'let': let_expression,
         'value': lambda name: env[name]
     }
 
@@ -83,17 +82,25 @@ def evaluate(exp, env={}):
         return isinstance(exp, list) and exp[0] == 'let'
 
     def is_binding(exp):
-        return isinstance(exp, str)
+        return isinstance(exp, str)  # TODO: not sure
+
+    def is_define(exp):
+        return isinstance(exp, list) and exp[0] == 'define'
 
     def function_call(exp):
         function = operations[exp[0]]
-        args = [evaluate(x) for x in exp[1:]]
+        args = [evaluate(x, env) for x in exp[1:]]
         return function(*args)
 
     if not exp:
         return []
     elif is_let(exp):
         return let_expression(*exp[1:])
+    elif is_define(exp):
+        _, name, value = exp
+        val = evaluate(value, env)
+        env[name] = val
+        return val
     elif is_operation(exp):
         return function_call(exp)
     elif is_binding(exp):
