@@ -2,6 +2,23 @@ import operator
 import functools
 import sys
 
+DEFAULT_ENV = {
+    '+': lambda *args: sum(args),
+    '*': lambda *args: functools.reduce(operator.mul, args),
+    '-': operator.sub,
+    '/': operator.truediv,
+    '>': operator.gt,
+    '<': operator.lt,
+    '>=': operator.ge,
+    '<=': operator.le,
+    '=': operator.eq,
+    'cons': lambda *args: list(args),
+    'car': lambda alist: alist[0],
+    'cdr': lambda alist: alist[1],
+    'valof': lambda name: env[name]
+}
+
+
 def compose(*fs):
     def compose2(f, g):
         return lambda *a, **kw: f(g(*a, **kw))
@@ -51,50 +68,30 @@ def read(tokens):
         return atomize(t)
 
 
-def evaluate(exp, env={}):
+def evaluate(exp, env=dict(DEFAULT_ENV)):
     """
     I: [+, 2, [-, 4, 2]]
     O: 4
     """
     def let_expression(bindings, exp):
         for name, value in bindings:
-            print("Name and value")
-            print(name)
-            print(value)
             env[name] = evaluate(value, env)
         return evaluate(exp, env)
 
-
-    operations = {
-        '+': lambda *args: sum(args),
-        '*': lambda *args: functools.reduce(operator.mul, args),
-        '-': operator.sub,
-        '/': operator.truediv,
-        '>': operator.gt,
-        '<': operator.lt,
-        '>=': operator.ge,
-        '<=': operator.le,
-        '=': operator.eq,
-        'cons': lambda *args: list(args),
-        'car': lambda alist: alist[0],
-        'cdr': lambda alist: alist[1],
-        'value': lambda name: env[name]
-    }
-
-    def is_operation(exp):
-        return isinstance(exp, list) and exp[0] in operations
+    def is_funcall(exp):
+        return isinstance(exp, list) and exp[0] in env
 
     def is_let(exp):
         return isinstance(exp, list) and exp[0] == 'let'
 
     def is_binding(exp):
-        return isinstance(exp, str)  # TODO: not sure
+        return isinstance(exp, str)
 
     def is_define(exp):
         return isinstance(exp, list) and exp[0] == 'define'
 
     def function_call(exp):
-        function = operations[exp[0]]
+        function = env[exp[0]]
         args = [evaluate(x, env) for x in exp[1:]]
         return function(*args)
 
@@ -107,7 +104,7 @@ def evaluate(exp, env={}):
         val = evaluate(value, env)
         env[name] = val
         return val
-    elif is_operation(exp):
+    elif is_funcall(exp):
         return function_call(exp)
     elif is_binding(exp):
         return env[exp]

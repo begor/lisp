@@ -1,6 +1,6 @@
 import pytest
 
-from lisp.parser import evaluate, parse
+from lisp.parser import evaluate, parse, DEFAULT_ENV
 
 parametrize = pytest.mark.parametrize
 
@@ -21,7 +21,7 @@ PROGRAM_2_RESULT = [
 
 
 ENV_PROGRAM_RESULT = [
-    ({'xs': [1, [2, [3, []]]]}, '(car xs)', 1)
+    ({**DEFAULT_ENV, **{'xs': [1, [2, [3, []]]]}}, '(car xs)', 1)
 ]
 
 
