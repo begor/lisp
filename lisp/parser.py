@@ -1,5 +1,11 @@
 import operator
-from functools import reduce, partial
+import functools
+import sys
+
+def compose(*fs):
+    def compose2(f, g):
+        return lambda *a, **kw: f(g(*a, **kw))
+    return functools.reduce(compose2, reversed(fs))
 
 
 def tokenize(program):
@@ -61,7 +67,7 @@ def evaluate(exp, env={}):
 
     operations = {
         '+': lambda *args: sum(args),
-        '*': lambda *args: reduce(operator.mul, args),
+        '*': lambda *args: functools.reduce(operator.mul, args),
         '-': operator.sub,
         '/': operator.truediv,
         '>': operator.gt,
@@ -114,6 +120,13 @@ def parse(program):
     ast = read(tokens)
     return ast
 
+
+pretty_print = print
+
+
+interpreter = compose(parse, evaluate, pretty_print)
+
+
 if __name__ == '__main__':
-    ast = parse('(define x (cons 1 (cons 2 ()))) (value x)')
-    print(ast)
+    program = sys.argv[-1]
+    interpreter(program)
