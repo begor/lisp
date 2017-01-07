@@ -17,6 +17,12 @@ PROGRAM_2_RESULT = [
     ('(cdr (cons 1 (cons 2 (cons 3 ()))))', [2, [3, []]]),
     ('(let ((x (cons 1 (cons 2)))) (car x))', 1),
     ('(define x (cons 1 (cons 2 (cons 3 ()))))', [1, [2, [3, []]]]),
+    ('(let ((f (lambda (x) (* x 2)))) (f 2))', 4),
+    ("""
+     (let ((f (lambda
+                (x)
+                (let ((y 2)) (* x y))))) (f 2))
+     """, 4)
 ]
 
 

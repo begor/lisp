@@ -2,6 +2,22 @@ import operator
 import functools
 import sys
 
+class F:
+    """Representation of a 'function-object' with lexical scoping."""
+
+    def __init__(self, args, body, env):
+        """Initialize function object."""
+
+        self._body = body
+        self._args = args
+        self._env = env
+
+    def __call__(self, *args):
+        bounded_vars = dict(zip(self._args, args))
+        env_with_formal_params = {**self._env, **bounded_vars}
+        return evaluate(self._body, env_with_formal_params)
+
+
 DEFAULT_ENV = {
     '+': lambda *args: sum(args),
     '*': lambda *args: functools.reduce(operator.mul, args),
@@ -78,17 +94,23 @@ def evaluate(exp, env=dict(DEFAULT_ENV)):
             env[name] = evaluate(value, env)
         return evaluate(exp, env)
 
+    def match(exp, first_term):
+        return isinstance(exp, list) and exp[0] == first_term
+
     def is_funcall(exp):
         return isinstance(exp, list) and exp[0] in env
 
     def is_let(exp):
-        return isinstance(exp, list) and exp[0] == 'let'
+        return match(exp, 'let')
+
+    def is_define(exp):
+        return match(exp, 'define')
+
+    def is_lambda(exp):
+        return match(exp, 'lambda')
 
     def is_binding(exp):
         return isinstance(exp, str)
-
-    def is_define(exp):
-        return isinstance(exp, list) and exp[0] == 'define'
 
     def function_call(exp):
         function = env[exp[0]]
@@ -96,7 +118,7 @@ def evaluate(exp, env=dict(DEFAULT_ENV)):
         return function(*args)
 
     if not exp:
-        return []
+        return []  # TODO: return something like a nil
     elif is_let(exp):
         return let_expression(*exp[1:])
     elif is_define(exp):
@@ -104,6 +126,9 @@ def evaluate(exp, env=dict(DEFAULT_ENV)):
         val = evaluate(value, env)
         env[name] = val
         return val
+    elif is_lambda(exp):
+        _, args, body = exp
+        return F(args, body, env)
     elif is_funcall(exp):
         return function_call(exp)
     elif is_binding(exp):
