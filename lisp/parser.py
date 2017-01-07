@@ -6,13 +6,20 @@ class F:
     """Representation of a 'function-object' with lexical scoping."""
 
     def __init__(self, args, body, env):
-        """Initialize function object."""
+        """
+        Initialize function object.
+        Passing env allows to use lexical scoping.
+        """
 
         self._body = body
         self._args = args
         self._env = env
 
     def __call__(self, *args):
+        """
+        Implementing 'function-object' as a functor.
+        """
+
         bounded_vars = dict(zip(self._args, args))
         env_with_formal_params = {**self._env, **bounded_vars}
         return evaluate(self._body, env_with_formal_params)
