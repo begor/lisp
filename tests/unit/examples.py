@@ -1,3 +1,6 @@
+from lisp.environment import Env
+
+
 expression2result = [
     ('()', []),
     ('(+ 2 3.2)', 5.2),
@@ -46,4 +49,19 @@ environment_program2result = [
      """,
      2),
 
+]
+
+environment_name2value = [
+    [Env(names=('x',), values=(42,)),
+     'x',
+     42],
+    [Env(names=('x', 'y'), values=(42, 84)),
+     'x',
+     42],
+    [Env(names=('x', 'y'), values=(42, 84), outer=Env(names=('z',), values=(14,))),
+     'z',
+     14],
+    [Env(names=('x', 'y', 'z'), values=(42, 84, 15), outer=Env(names=('z',), values=(14,))),
+     'z',
+     15]
 ]
