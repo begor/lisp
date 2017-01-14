@@ -11,12 +11,12 @@ PROGRAM_2_RESULT = [
     ('(+ 2 (- 4 (* 2 1)))', 4),
     ('(+ (+ (+ 1 (+ 2 3)) 4 5 6) 7 (- 9 1) 9)', 45),
     ('(* 1 2 3 4 5)', 120),
-    ('(cons 1 (cons 2 (cons 3 ())))', [1, [2, [3, []]]]),
+    ('(cons 1 (cons 2 (cons 3 ())))', [1, 2, 3]),
     ('(car (cons 1 (cons 2 ())))', 1),
-    ('(cdr (cons 1 (cons 2 ())))', [2, []]),
-    ('(cdr (cons 1 (cons 2 (cons 3 ()))))', [2, [3, []]]),
-    ('(let ((x (cons 1 (cons 2)))) (car x))', 1),
-    ('(define x (cons 1 (cons 2 (cons 3 ()))))', [1, [2, [3, []]]]),
+    ('(cdr (cons 1 (cons 2 ())))', [2]),
+    ('(cdr (cons 1 (cons 2 (cons 3 ()))))', [2, 3]),
+    ('(let ((x (cons 1 (cons 2 ())))) (car x))', 1),
+    ('(define x (cons 1 (cons 2 (cons 3 ()))))', [1, 2, 3]),
     ('(let ((f (lambda (x) (* x 2)))) (f 2))', 4),
     ("""
     (let ((f (lambda
@@ -27,7 +27,7 @@ PROGRAM_2_RESULT = [
     (let ((f (lambda
              (x)
              (let ((y (cons 2 (cons 3 ())))) (cons x y))))) (f 1))
-     """, [1, [2, [3, []]]]),
+     """, [1, 2, 3]),
     ("""
     (let ((f (lambda
              (x)
