@@ -1,6 +1,8 @@
-import operator
 import functools
 import sys
+
+from .environment import default, Env
+
 
 class F:
     """Representation of a 'function-object' with lexical scoping."""
@@ -20,27 +22,8 @@ class F:
         Implementing 'function-object' as a functor.
         """
 
-        bounded_vars = dict(zip(self._args, args))
-        env_with_formal_params = {**self._env, **bounded_vars}
-        return evaluate(self._body, env_with_formal_params)
-
-def builtins():
-    return {
-        '+': lambda *args: sum(args),
-        '*': lambda *args: functools.reduce(operator.mul, args),
-        '-': operator.sub,
-        '/': operator.truediv,
-        '>': operator.gt,
-        '<': operator.lt,
-        '>=': operator.ge,
-        '<=': operator.le,
-        '=': operator.eq,
-        'cons': lambda x, thelist: [x] + thelist,
-        'list': lambda *xs: list(xs),
-        'car': lambda alist: alist[0],
-        'cdr': lambda alist: alist[1:],
-        'valof': lambda name: env[name]
-    }
+        env = Env(names=self._args, values=args, outer=self._env)
+        return evaluate(self._body, env)
 
 
 def compose(*fs):
@@ -92,21 +75,19 @@ def read(tokens):
         return atomize(t)
 
 
-def evaluate(exp, env=builtins()):
+def evaluate(exp, env=default):
     """
     I: [+, 2, [-, 4, 2]]
     O: 4
     """
+
     def let_expression(bindings, exp):
-        for name, value in bindings:
-            env[name] = evaluate(value, env)
-        return evaluate(exp, env)
+        names = [b[0] for b in bindings]
+        values = [evaluate(b[1], env) for b in bindings]
+        return evaluate(exp, Env(names=names, values=values, outer=env))
 
     def match(exp, first_term):
-        return isinstance(exp, list) and exp[0] == first_term
-
-    def is_funcall(exp):
-        return isinstance(exp, list) and exp[0] in env
+        return exp[0] == first_term
 
     def is_let(exp):
         return match(exp, 'let')
@@ -121,12 +102,16 @@ def evaluate(exp, env=builtins()):
         return isinstance(exp, str)
 
     def function_call(exp):
-        function = env[exp[0]]
+        function = env.lookup(exp[0])
         args = [evaluate(x, env) for x in exp[1:]]
         return function(*args)
 
     if not exp:
-        return []  # TODO: return something like a nil
+        return []
+    if isinstance(exp, str):
+        return env.lookup(exp)
+    if not isinstance(exp, list):
+        return exp
     elif is_let(exp):
         return let_expression(*exp[1:])
     elif is_define(exp):
@@ -137,12 +122,8 @@ def evaluate(exp, env=builtins()):
     elif is_lambda(exp):
         _, args, body = exp
         return F(args, body, env)
-    elif is_funcall(exp):
-        return function_call(exp)
-    elif is_binding(exp):
-        return env[exp]
     else:
-        return exp
+        return function_call(exp)
 
 
 def parse(program):

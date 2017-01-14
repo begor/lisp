@@ -1,6 +1,7 @@
 import pytest
 
-from lisp.parser import evaluate, parse, builtins
+from lisp.environment import default
+from lisp.parser import evaluate, parse
 from examples import expression2result, environment_program2result
 
 
@@ -9,8 +10,8 @@ parametrize = pytest.mark.parametrize
 
 def extend_environment(test):
     def wrapper(env, program, result):
-        env = {**builtins(), **env}
-        test(env, program, result)
+        default.update(env)
+        test(default, program, result)
     return wrapper
 
 
