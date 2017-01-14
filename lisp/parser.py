@@ -36,7 +36,7 @@ DEFAULT_ENV = {
     '<=': operator.le,
     '=': operator.eq,
     'cons': lambda x, thelist: [x] + thelist,
-    'list': list,
+    'list': lambda *xs: list(xs),
     'car': lambda alist: alist[0],
     'cdr': lambda alist: alist[1:],
     'valof': lambda name: env[name]

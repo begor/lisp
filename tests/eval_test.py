@@ -15,6 +15,8 @@ PROGRAM_2_RESULT = [
     ('(car (cons 1 (cons 2 ())))', 1),
     ('(cdr (cons 1 (cons 2 ())))', [2]),
     ('(cdr (cons 1 (cons 2 (cons 3 ()))))', [2, 3]),
+    ('(list 1 2 3 4 5)', [1, 2, 3, 4, 5]),
+    ('(car (list (cons 1 (cons 2 ())) 3 4 5))', [1, 2]),
     ('(let ((x (cons 1 (cons 2 ())))) (car x))', 1),
     ('(define x (cons 1 (cons 2 (cons 3 ()))))', [1, 2, 3]),
     ('(let ((f (lambda (x) (* x 2)))) (f 2))', 4),
