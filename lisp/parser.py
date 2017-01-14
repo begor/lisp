@@ -24,23 +24,23 @@ class F:
         env_with_formal_params = {**self._env, **bounded_vars}
         return evaluate(self._body, env_with_formal_params)
 
-
-DEFAULT_ENV = {
-    '+': lambda *args: sum(args),
-    '*': lambda *args: functools.reduce(operator.mul, args),
-    '-': operator.sub,
-    '/': operator.truediv,
-    '>': operator.gt,
-    '<': operator.lt,
-    '>=': operator.ge,
-    '<=': operator.le,
-    '=': operator.eq,
-    'cons': lambda x, thelist: [x] + thelist,
-    'list': lambda *xs: list(xs),
-    'car': lambda alist: alist[0],
-    'cdr': lambda alist: alist[1:],
-    'valof': lambda name: env[name]
-}
+def builtins():
+    return {
+        '+': lambda *args: sum(args),
+        '*': lambda *args: functools.reduce(operator.mul, args),
+        '-': operator.sub,
+        '/': operator.truediv,
+        '>': operator.gt,
+        '<': operator.lt,
+        '>=': operator.ge,
+        '<=': operator.le,
+        '=': operator.eq,
+        'cons': lambda x, thelist: [x] + thelist,
+        'list': lambda *xs: list(xs),
+        'car': lambda alist: alist[0],
+        'cdr': lambda alist: alist[1:],
+        'valof': lambda name: env[name]
+    }
 
 
 def compose(*fs):
@@ -92,7 +92,7 @@ def read(tokens):
         return atomize(t)
 
 
-def evaluate(exp, env=dict(DEFAULT_ENV)):
+def evaluate(exp, env=builtins()):
     """
     I: [+, 2, [-, 4, 2]]
     O: 4
