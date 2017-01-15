@@ -95,6 +95,17 @@ def read(tokens):
         return atomize(t)
 
 
+def to_bool(value):
+    """
+    """
+    falsy = ['false', [], 0]  # TODO: not sure
+
+    if value in falsy:
+        return False
+
+    return True
+
+
 def evaluate(exp, env=default):
     """
     Evaluate expression exp in environment env.
@@ -132,9 +143,25 @@ def evaluate(exp, env=default):
         env.update({name: val})
         return val
 
+    def if_(predicate, if_true_exp, if_false_exp):
+        """
+        Handle if special form.
+
+        First, evaluate predicate under current environment to a value V.
+        Second, if V is truthy evaluate if_true_exp to a value V'.
+        Otherwise, evaluate if_false_exp to a value V'.
+
+        Return V' as a result.
+        """
+        predicate_value = to_bool(evaluate(predicate, env))
+
+        return (evaluate(if_true_exp, env) if predicate_value
+                else evaluate(if_false_exp, env))
+
     def match(exp, first_term):
         return exp[0] == first_term
 
+    # TODO: use table of special forms (?)
     def is_symbol(exp):
         return isinstance(exp, str)
 
@@ -150,6 +177,9 @@ def evaluate(exp, env=default):
     def is_lambda(exp):
         return match(exp, 'lambda')
 
+    def is_if(exp):
+        return match(exp, 'if')
+
     def is_binding(exp):
         return isinstance(exp, str)
 
@@ -160,10 +190,13 @@ def evaluate(exp, env=default):
 
     if not exp:
         return NIL
-    if is_symbol(exp):
+    elif is_symbol(exp):
         return env.lookup(exp)
-    if is_literal(exp):
+    elif is_literal(exp):
         return exp
+    elif is_if(exp):
+        _, predicate, if_true, if_false = exp
+        return if_(predicate, if_true, if_false)
     elif is_let(exp):
         _, bindings, body = exp
         return let(bindings, body)

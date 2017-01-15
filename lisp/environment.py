@@ -26,6 +26,8 @@ def builtins():
         '>=': operator.ge,
         '<=': operator.le,
         '=': operator.eq,
+        'and': operator.and_,
+        'or': operator.or_,
         'cons': lambda x, thelist: [x] + thelist,
         'list': lambda *xs: list(xs),
         'car': lambda alist: alist[0],

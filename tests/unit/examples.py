@@ -16,6 +16,8 @@ expression2result = [
     ('(let ((x (cons 1 (cons 2 ())))) (car x))', 1),
     ('(define x (cons 1 (cons 2 (cons 3 ()))))', [1, 2, 3]),
     ('(let ((f (lambda (x) (* x 2)))) (f 2))', 4),
+    ('(if (> 3 2) 4 5)', 4),
+    ('(if (and (> 3 2) (= 0 1)) 4 5)', 5),
     ("""
     (let ((f (lambda
              (x)
