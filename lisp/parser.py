@@ -4,6 +4,25 @@ import sys
 from .environment import default, Env
 
 
+NIL = []
+
+
+def compose(*fs):
+    """
+    Helper for convinient function composition.
+
+    Example:
+    f(g(t(args))) <-> compose(f, g, t)(args)
+    """
+    def compose2(f, g):
+        return lambda *a, **kw: f(g(*a, **kw))
+
+    return functools.reduce(compose2, reversed(fs))
+
+
+pretty_print = print
+
+
 class F:
     """Representation of a 'function-object' with lexical scoping."""
 
@@ -26,12 +45,6 @@ class F:
         return evaluate(self._body, env)
 
 
-def compose(*fs):
-    def compose2(f, g):
-        return lambda *a, **kw: f(g(*a, **kw))
-    return functools.reduce(compose2, reversed(fs))
-
-
 def tokenize(program):
     """
     I: (+ 2 (- 4 2))
@@ -52,9 +65,16 @@ def atomize(token):
 
 def read(tokens):
     """
-    I: [(, +, 2, (, -, 4, 2, ), )]
-    O: [+, 2, [-, 4, 2]]
+    Read stream of tokens, return AST.
+
+    Tokens represented as a flat list.
+    AST represented as a nested lists.
+
+    Exaple:
+    > read([(, +, 2, (, -, 4, 2, ), )])
+    >> [+, 2, [-, 4, 2]]
     """
+
     def proceed_list(tokens):
         l = []
         while tokens[0] != ')':
@@ -70,24 +90,56 @@ def read(tokens):
     if t == '(':
         return proceed_list(tokens)
     elif t == ')':
-        raise SyntaxError()
+        raise SyntaxError('Unexpected ) term')
     else:
         return atomize(t)
 
 
 def evaluate(exp, env=default):
     """
-    I: [+, 2, [-, 4, 2]]
-    O: 4
+    Evaluate expression exp in environment env.
+
+    Expression represented as a list of terms.
+    Environment as an instance of Env class.
+
+    Example:
+    > evaluate([+, 2, [-, 4, 2]], Env())  # Passing empty env
+    >> 4
     """
 
-    def let_expression(bindings, exp):
+    def let(bindings, body):
+        """
+        Handle let special form.
+
+        First, extend current environment with bindings.
+        Second, evaluate body under extended environment.
+        """
         names = [b[0] for b in bindings]
         values = [evaluate(b[1], env) for b in bindings]
-        return evaluate(exp, Env(names=names, values=values, outer=env))
+        new_env = Env(names=names, values=values, outer=env)
+        return evaluate(body, new_env)
+
+    def define(name, exp):
+        """
+        Handle define special form.
+
+        First, evaluate exp under under current environment to a value V.
+        Second, extend current environment with name -> V pair.
+
+        Return V as a result.
+        """
+        val = evaluate(exp, env)
+        env.update({name: val})
+        return val
 
     def match(exp, first_term):
         return exp[0] == first_term
+
+    def is_symbol(exp):
+        return isinstance(exp, str)
+
+    def is_literal(exp):
+        return not isinstance(exp, list)
 
     def is_let(exp):
         return match(exp, 'let')
@@ -107,18 +159,17 @@ def evaluate(exp, env=default):
         return function(*args)
 
     if not exp:
-        return []
-    if isinstance(exp, str):
+        return NIL
+    if is_symbol(exp):
         return env.lookup(exp)
-    if not isinstance(exp, list):
+    if is_literal(exp):
         return exp
     elif is_let(exp):
-        return let_expression(*exp[1:])
+        _, bindings, body = exp
+        return let(bindings, body)
     elif is_define(exp):
-        _, name, value = exp
-        val = evaluate(value, env)
-        env[name] = val
-        return val
+        _, name, exp = exp
+        return define(name, exp)
     elif is_lambda(exp):
         _, args, body = exp
         return F(args, body, env)
@@ -127,12 +178,12 @@ def evaluate(exp, env=default):
 
 
 def parse(program):
+    """
+    Convert string program to an AST.
+    """
     tokens = tokenize(program)
     ast = read(tokens)
     return ast
-
-
-pretty_print = print
 
 
 interpreter = compose(parse, evaluate, pretty_print)
