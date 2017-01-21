@@ -220,8 +220,3 @@ def parse(program):
 
 
 interpreter = compose(parse, evaluate, pretty_print)
-
-
-if __name__ == '__main__':
-    program = sys.argv[-1]
-    interpreter(program)
