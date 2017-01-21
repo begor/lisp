@@ -1,7 +1,8 @@
 import pytest
 
 from lisp.environment import default
-from lisp.parser import evaluate, parse
+from lisp.evaluator import evaluate
+from lisp.parser import parse
 from examples import expression2result, environment_program2result
 
 

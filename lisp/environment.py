@@ -3,15 +3,29 @@ import operator
 
 
 class Env(dict):
-    """TODO: tests"""
+    """
+    Environment for some computation.
+
+    Implemented with recursive composition -
+    each environment has the outer environment.
+    Every lookup for a name N in the environment E
+    with outer environment O goes like this:
+
+    1) E.lookup(N)
+    2) O.lookup(N)
+    3) O.O.lookup(N)
+    ...
+
+    Until we find N in some environment.
+    """
 
     def __init__(self, names=(), values=(), outer=None):
         self.update(zip(names, values))
         self.outer = outer
 
     def lookup(self, name):
-        "Find the innermost Env where var appears."
         return self[name] if (name in self) else self.outer.lookup(name)
+
 
 
 def builtins():
