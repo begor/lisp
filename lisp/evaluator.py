@@ -17,6 +17,9 @@ class F:
         self._args = args
         self._env = env
 
+    def __repr__(self):
+        return '(lambda ({}))'.format(self._args)
+
     def __call__(self, *args):
         """Implementing 'function-object' as a functor."""
 
