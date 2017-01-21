@@ -86,7 +86,6 @@ def evaluate(exp, env=default):
     def match(exp, first_term):
         return exp[0] == first_term
 
-    # TODO: use table of special forms (?)
     def is_symbol(exp):
         return isinstance(exp, str)
 
@@ -95,6 +94,12 @@ def evaluate(exp, env=default):
 
     def is_let(exp):
         return match(exp, 'let')
+
+    def is_quote(exp):
+        return match(exp, 'quote')
+
+    def is_unquote(exp):
+        return match(exp, 'unquote')
 
     def is_define(exp):
         return match(exp, 'define')
@@ -120,6 +125,9 @@ def evaluate(exp, env=default):
         return env.lookup(exp)
     elif is_literal(exp):
         return exp
+    elif is_quote(exp):
+        _, datum = exp
+        return datum
     elif is_if(exp):
         _, predicate, if_true, if_false = exp
         return if_(predicate, if_true, if_false)
