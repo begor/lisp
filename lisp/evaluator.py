@@ -17,6 +17,9 @@ class F:
         self._args = args
         self._env = env
 
+    def __repr__(self):
+        return '(lambda ({}))'.format(self._args)
+
     def __call__(self, *args):
         """Implementing 'function-object' as a functor."""
 
@@ -83,10 +86,21 @@ def evaluate(exp, env=default):
         return (evaluate(if_true_exp, env) if predicate_value
                 else evaluate(if_false_exp, env))
 
-    def match(exp, first_term):
-        return exp[0] == first_term
+    def quasiquoute(exp):
+        """
+        Handle 'quasiquoute' special form.
 
-    # TODO: use table of special forms (?)
+        Traverse given exp, if subexpression is 'unquote' special form,
+        evaluate it. If not -- left as is.
+
+        Return modified exp.
+        """
+        return [evaluate(datum, env) if is_unquote(datum) else datum
+                for datum in exp]
+
+    def match(exp, first_term):
+        return isinstance(exp, list) and exp[0] == first_term
+
     def is_symbol(exp):
         return isinstance(exp, str)
 
@@ -95,6 +109,15 @@ def evaluate(exp, env=default):
 
     def is_let(exp):
         return match(exp, 'let')
+
+    def is_quasiqoute(exp):
+        return match(exp, 'quasiquote')
+
+    def is_quote(exp):
+        return match(exp, 'quote')
+
+    def is_unquote(exp):
+        return match(exp, 'unquote')
 
     def is_define(exp):
         return match(exp, 'define')
@@ -120,6 +143,15 @@ def evaluate(exp, env=default):
         return env.lookup(exp)
     elif is_literal(exp):
         return exp
+    elif is_quote(exp):
+        _, datum = exp
+        return datum
+    elif is_unquote(exp):
+        _, datum = exp
+        return evaluate(datum, env)
+    elif is_quasiqoute(exp):
+        _, datum = exp
+        return quasiquoute(datum)
     elif is_if(exp):
         _, predicate, if_true, if_false = exp
         return if_(predicate, if_true, if_false)
