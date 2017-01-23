@@ -88,12 +88,18 @@ def evaluate(exp, env=default):
 
     def quasiquoute(exp):
         """
+        Handle 'quasiquoute' special form.
+
+        Traverse given exp, if subexpression is 'unquote' special form,
+        evaluate it. If not -- left as is.
+
+        Return modified exp.
         """
-        return [evaluate(s, env) if isinstance(s, list) and is_unquote(s) else s
-                for s in exp]
+        return [evaluate(datum, env) if is_unquote(datum) else datum
+                for datum in exp]
 
     def match(exp, first_term):
-        return exp[0] == first_term
+        return isinstance(exp, list) and exp[0] == first_term
 
     def is_symbol(exp):
         return isinstance(exp, str)
