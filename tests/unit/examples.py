@@ -19,6 +19,7 @@ expression2result = [
     ('(if (> 3 2) 4 5)', 4),
     ('(if (and (> 3 2) (= 0 1)) 4 5)', 5),
     ('(quote (cons 1 (list 2 3 4)))', ['cons', 1, ['list', 2, 3, 4]]),
+    ('(quasiquote (0 (unquote (+ 1 2)) 4))', [0, 3, 4]),
     ("""
     (let ((f (lambda
              (x)

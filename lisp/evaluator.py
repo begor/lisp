@@ -86,6 +86,12 @@ def evaluate(exp, env=default):
         return (evaluate(if_true_exp, env) if predicate_value
                 else evaluate(if_false_exp, env))
 
+    def quasiquoute(exp):
+        """
+        """
+        return [evaluate(s, env) if isinstance(s, list) and is_unquote(s) else s
+                for s in exp]
+
     def match(exp, first_term):
         return exp[0] == first_term
 
@@ -97,6 +103,9 @@ def evaluate(exp, env=default):
 
     def is_let(exp):
         return match(exp, 'let')
+
+    def is_quasiqoute(exp):
+        return match(exp, 'quasiquote')
 
     def is_quote(exp):
         return match(exp, 'quote')
@@ -131,6 +140,12 @@ def evaluate(exp, env=default):
     elif is_quote(exp):
         _, datum = exp
         return datum
+    elif is_unquote(exp):
+        _, datum = exp
+        return evaluate(datum, env)
+    elif is_quasiqoute(exp):
+        _, datum = exp
+        return quasiquoute(datum)
     elif is_if(exp):
         _, predicate, if_true, if_false = exp
         return if_(predicate, if_true, if_false)
