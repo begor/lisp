@@ -38,7 +38,6 @@ class Env(dict):
             raise LookupError(self.lookup_error_msg.format(name, self))
 
 
-
 def builtins():
     """
     Define default environment full of builtin procedures.

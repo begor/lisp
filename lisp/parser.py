@@ -10,8 +10,11 @@ def tokenize(program):
     > (+ 2 (- 4 2))
     > [(, +, 2, (, -, 4, 2, ), )]
     """
-
-    return program.replace(')', ' ) ').replace('(', ' ( ').split()
+    one_liner = program.replace('\n', '')
+    program = one_liner.replace(')', ' ) ').replace('(', ' ( ')
+    ololo = program.split()
+    print(ololo)
+    return ololo
 
 
 def atomize(token):
@@ -28,7 +31,7 @@ def atomize(token):
 
 def read(tokens):
     """
-    Read stream of tokens, return AST.
+    Read list tokens, return AST.
 
     Tokens represented as a flat list.
     AST represented as a nested lists.
@@ -38,24 +41,34 @@ def read(tokens):
     >> [+, 2, [-, 4, 2]]
     """
 
-    def proceed_list(tokens):
-        l = []
-        while tokens[0] != ')':
-            l.append(read(tokens))
-        tokens.pop(0)
-        return l
-
     if not len(tokens):
         raise SyntaxError('Empty program')
 
-    t = tokens.pop(0)
+    # TODO: rewrite entirely!
+    ast = []
+    deep = 0
+    current = prev = ast
+    stack = []  # Stack of nested nodes (TODO: looks wierd)
+    for i, t in enumerate(tokens):
+        if t == '(':
+            deep += 1
+            new_current = []
+            current.append(new_current)
+            stack.append(current)
+            current = new_current
+        elif t == ')':
+            if deep == 0:
+                raise SyntaxError('Unexpected ) term')
+            else:
+                deep -= 1
+                current = stack.pop()
+        else:
+            current.append(atomize(t))
 
-    if t == '(':
-        return proceed_list(tokens)
-    elif t == ')':
-        raise SyntaxError('Unexpected ) term')
-    else:
-        return atomize(t)
+    if deep > 0:
+        raise SyntaxError('Missing ) term')
+
+    return ast
 
 
 def parse(program):

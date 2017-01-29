@@ -4,27 +4,13 @@ from lisp.environment import default, Env
 NIL = []
 
 
-class F:
-    """Representation of a 'function-object' with lexical scoping."""
+def procedure(params, body, env):
+    """
+    User defined procedure.
 
-    def __init__(self, args, body, env):
-        """
-        Initialize function object.
-        Passing env allows to use lexical scoping.
-        """
-
-        self._body = body
-        self._args = args
-        self._env = env
-
-    def __repr__(self):
-        return '(lambda ({}))'.format(self._args)
-
-    def __call__(self, *args):
-        """Implementing 'function-object' as a functor."""
-
-        env = Env(names=self._args, values=args, outer=self._env)
-        return evaluate(self._body, env)
+    Uses lexical scoping (lookup names in the place it was defined).
+    """
+    return lambda *args: evaluate(body, Env(params, args, env))
 
 
 def to_bool(value):
@@ -32,6 +18,16 @@ def to_bool(value):
     falsy = ['false', [], 0]
 
     return False if value in falsy else True
+
+def many_expressions(exp):
+    return isinstance(exp, list) and all(isinstance(subexp, list) for subexp in exp)
+
+
+def evaluate_ast(ast):
+    for node in ast:
+        result = evaluate(node)
+
+    return result # Result of last expression
 
 
 def evaluate(exp, env=default):
@@ -45,6 +41,11 @@ def evaluate(exp, env=default):
     > evaluate([+, 2, [-, 4, 2]], Env())  # Passing empty env
     >> 4
     """
+    if many_expressions(exp):
+        result = NIL
+        for subexp in exp:
+            result = evaluate(subexp, env)
+        return result
 
     def let(bindings, body):
         """
@@ -148,8 +149,9 @@ def evaluate(exp, env=default):
         return isinstance(exp, str)
 
     def function_call(exp):
-        function = env.lookup(exp[0])
-        args = [evaluate(x, env) for x in exp[1:]]
+        name, *args = exp
+        function = env.lookup(name)
+        args = [evaluate(x, env) for x in args]
         return function(*args)
 
     # Kinda of pattern-matching.
@@ -182,6 +184,6 @@ def evaluate(exp, env=default):
         return define(name, exp)
     elif is_lambda(exp):
         _, args, body = exp
-        return F(args, body, env)
+        return procedure(args, body, env)
     else:
         return function_call(exp)

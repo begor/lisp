@@ -1,7 +1,7 @@
 import functools
 
 from lisp.parser import parse
-from lisp.evaluator import evaluate
+from lisp.evaluator import evaluate, evaluate_ast
 
 
 def compose(*fs):
@@ -17,4 +17,4 @@ def compose(*fs):
     return functools.reduce(compose2, reversed(fs))  # Need to revese!
 
 
-interpreter = compose(parse, evaluate, print)
+interpreter = compose(parse, evaluate_ast, print)
