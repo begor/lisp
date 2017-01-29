@@ -18,6 +18,12 @@ expression2result = [
     ('(let ((f (lambda (x) (* x 2)))) (f 2))', 4),
     ('(if (> 3 2) 4 5)', 4),
     ('(if (and (> 3 2) (= 0 1)) 4 5)', 5),
+    ('(list? (list 1 2 3 4 5))', True),
+    ('(atom? 4)', True),
+    ('(number? 4)', True),
+    ('(atom? (list 1 2 3)))', False),
+    ('(number? (quote symbol))', False),
+    ('(symbol? (quote symbol))', True),
     ('(quote (cons 1 (list 2 3 4)))', ['cons', 1, ['list', 2, 3, 4]]),
     ('(quasiquote (0 (unquote (+ 1 2)) 4))', [0, 3, 4]),
     ("""
@@ -38,6 +44,20 @@ expression2result = [
                                                 (car y))))))
          (f 2))
      """, 4),
+    ("""
+     (let ((f (lambda (xs)
+                (if (list? xs)
+                    (sum xs)
+                    xs))))
+            (f (list 1 2 3 4 5)))
+     """, 15),
+    ("""
+     (let ((f (lambda (xs)
+                (if (list? xs)
+                    (sum xs)
+                    xs))))
+            (f 15))
+     """, 15),
 ]
 
 

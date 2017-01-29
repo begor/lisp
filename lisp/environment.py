@@ -24,6 +24,7 @@ class Env(dict):
         self.outer = outer
 
     def lookup(self, name):
+        # TODO: use magic method instead
         return self[name] if (name in self) else self.outer.lookup(name)
 
 
@@ -42,11 +43,17 @@ def builtins():
         '=': operator.eq,
         'and': operator.and_,
         'or': operator.or_,
-        'cons': lambda x, thelist: [x] + thelist,
-        'list': lambda *xs: list(xs),
         'car': lambda alist: alist[0],
         'cdr': lambda alist: alist[1:],
-        'valof': lambda name: env[name],
+        'cons': lambda head, tail: [head] + tail,
+        'list': lambda *terms: list(terms),
+        'sum': sum,
+        'list?': lambda term: isinstance(term, list),
+        'atom?': lambda term: isinstance(term, (int, float, str)),
+        'number?': lambda term: isinstance(term, (int, float)),
+        'symbol?': lambda term: isinstance(term, str),
+        'function?': callable,
+        'eq?': operator.eq,
     })
 
     return env
