@@ -58,6 +58,11 @@ expression2result = [
                     xs))))
             (f 15))
      """, 15),
+    ("""
+     (let ((x (* 3 5))
+           (y 15))
+            (eq? x y))
+     """, True)
 ]
 
 

@@ -30,6 +30,22 @@ class Env(dict):
 
 
 def builtins():
+    """
+    Define default environment full of builtin procedures.
+
+    Basic primitives which all Lisps should have:
+        eq?
+        quote
+        cons
+        car
+        cdr
+        atom?
+
+    In addition, this Lisp also have:
+    - a set of numeric operations (+, -, =, /, etc)
+    - reflection functions (list?, number?, symbol?, etc)
+    - list processing functions (map, filter, foldl, etc) # TODO
+    """
     env = Env()
     env.update({
         '+': lambda *args: sum(args),
