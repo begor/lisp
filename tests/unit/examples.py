@@ -62,7 +62,12 @@ expression2result = [
      (let ((x (* 3 5))
            (y 15))
             (eq? x y))
-     """, True)
+     """, True),
+    ("""
+     (let ((x 2))
+        (let ((y (set! x (* x x))))
+            (* x y)))
+     """, 16),
 ]
 
 

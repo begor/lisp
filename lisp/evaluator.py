@@ -86,6 +86,19 @@ def evaluate(exp, env=default):
         return (evaluate(if_true_exp, env) if predicate_value
                 else evaluate(if_false_exp, env))
 
+    def set_(name, exp):
+        """
+        Handle 'set!' special form.
+
+        If name exists in current environment, update its value.
+        Else, fail.
+
+        Note: works ONLY for symbols/name/envs. Lists are immutable.
+        """
+        value = evaluate(exp, env)
+        env.set(name, value)
+        return value
+
     def quasiquoute(exp):
         """
         Handle 'quasiquoute' special form.
@@ -128,6 +141,9 @@ def evaluate(exp, env=default):
     def is_if(exp):
         return match(exp, 'if')
 
+    def is_set(exp):
+        return match(exp, 'set!')
+
     def is_binding(exp):
         return isinstance(exp, str)
 
@@ -153,11 +169,14 @@ def evaluate(exp, env=default):
         _, datum = exp
         return quasiquoute(datum)
     elif is_if(exp):
-        _, predicate, if_true, if_false = exp
-        return if_(predicate, if_true, if_false)
+        _, predicate, true_branch, false_branch = exp
+        return if_(predicate, true_branch, false_branch)
     elif is_let(exp):
         _, bindings, body = exp
         return let(bindings, body)
+    elif is_set(exp):
+        _, name, value = exp
+        return set_(name, value)
     elif is_define(exp):
         _, name, exp = exp
         return define(name, exp)

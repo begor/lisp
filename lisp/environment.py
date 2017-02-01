@@ -19,13 +19,23 @@ class Env(dict):
     Until we find N in some environment.
     """
 
+    lookup_error_msg = '{} not found in Env{}'
+
     def __init__(self, names=(), values=(), outer=None):
         self.update(zip(names, values))
         self.outer = outer
 
+    def set(self, name, new_value):
+        self.lookup(name)  # Will fail if no name in Env
+        self[name] = new_value
+
     def lookup(self, name):
-        # TODO: use magic method instead
-        return self[name] if (name in self) else self.outer.lookup(name)
+        if name in self:
+            return self[name]
+        elif self.outer:
+            return self.outer.lookup(name)
+        else:
+            raise LookupError(self.lookup_error_msg.format(name, self))
 
 
 
