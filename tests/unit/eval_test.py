@@ -1,7 +1,8 @@
 import pytest
 
 from lisp.environment import default
-from lisp.evaluator import evaluate
+from lisp.interpreter import evaluate_ast
+from lisp.evaluator import evaluate_expression
 from lisp.parser import parse
 from examples import expression2result, environment_program2result
 
@@ -17,13 +18,13 @@ def extend_environment(test):
 
 
 @parametrize('program, result', expression2result)
-def test_evaluates(program, result):
+def test_evaluate_ast(program, result):
     ast = parse(program)
-    assert evaluate(ast) == result
+    assert evaluate_ast(ast) == result
 
 
 @parametrize('env, program, result', environment_program2result)
 @extend_environment
-def test_evaluates_with_env(env, program, result):
+def test_evaluate_expression_with_env(env, program, result):
     ast = parse(program)
-    assert evaluate(ast, env) == result
+    assert evaluate_ast(ast, env) == result
