@@ -145,14 +145,11 @@ def evaluate(exp, env=default):
     def is_set(exp):
         return match(exp, 'set!')
 
-    def is_binding(exp):
-        return isinstance(exp, str)
-
     def function_call(exp):
-        name, *args = exp
-        function = env.lookup(name)
+        func, *args = exp
+        function_to_call = evaluate(func, env)
         args = [evaluate(x, env) for x in args]
-        return function(*args)
+        return function_to_call(*args)
 
     # Kinda of pattern-matching.
     if not exp:

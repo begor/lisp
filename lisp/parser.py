@@ -11,10 +11,8 @@ def tokenize(program):
     > [(, +, 2, (, -, 4, 2, ), )]
     """
     one_liner = program.replace('\n', '')
-    program = one_liner.replace(')', ' ) ').replace('(', ' ( ')
-    ololo = program.split()
-    print(ololo)
-    return ololo
+    tokens = one_liner.replace(')', ' ) ').replace('(', ' ( ').split()
+    return tokens
 
 
 def atomize(token):
@@ -44,35 +42,34 @@ def read(tokens):
     if not len(tokens):
         raise SyntaxError('Empty program')
 
-    # TODO: rewrite entirely!
-    ast = []
+    current_node = AST = []
     deep = 0
-    current = prev = ast
-    stack = []  # Stack of nested nodes (TODO: looks wierd)
-    for i, t in enumerate(tokens):
+    stack_of_nodes = []
+    for t in tokens:
         if t == '(':
             deep += 1
-            new_current = []
-            current.append(new_current)
-            stack.append(current)
-            current = new_current
+            child_node = []
+            current_node.append(child_node)
+            stack_of_nodes.append(current_node)
+            current_node = child_node
         elif t == ')':
             if deep == 0:
                 raise SyntaxError('Unexpected ) term')
             else:
                 deep -= 1
-                current = stack.pop()
+                current_node = stack_of_nodes.pop()
         else:
-            current.append(atomize(t))
+            current_node.append(atomize(t))
 
     if deep > 0:
         raise SyntaxError('Missing ) term')
 
-    return ast
+    return AST
 
 
 def parse(program):
     """Convert string program to an AST."""
     tokens = tokenize(program)
     ast = read(tokens)
+
     return ast
