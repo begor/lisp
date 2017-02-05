@@ -21,7 +21,7 @@ expression2result = [
     ('(list? (list 1 2 3 4 5))', True),
     ('(atom? 4)', True),
     ('(number? 4)', True),
-    ('(atom? (list 1 2 3)))', False),
+    ('(atom? (list 1 2 3))', False),
     ('(number? (quote symbol))', False),
     ('(symbol? (quote symbol))', True),
     ('(quote (cons 1 (list 2 3 4)))', ['cons', 1, ['list', 2, 3, 4]]),

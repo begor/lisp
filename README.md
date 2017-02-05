@@ -19,11 +19,18 @@ mbpro:lisp begor$ python lisp
 ```
 - Reading and interpreting files
 ```
-mbpro:lisp begor$ cat examples/square.lisp
-(let ((square (lambda (x) (* x x)))) (square 4))
+mbpro:lisp begor$ cat examples/fact.lisp
+(define fact
+  (lambda (n)
+    (if (<= n 1)
+      1
+      (* n
+        (fact (- n 1))))))
 
-mbpro:lisp begor$ python lisp examples/square.lisp
-16
+(fact 100)
+
+mbpro:lisp begor$ python lisp examples/fact.lisp
+93326215443944152681699238... 
 ```
 - Tests
 ```

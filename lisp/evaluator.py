@@ -1,30 +1,18 @@
+from functools import reduce
+
 from lisp.environment import default, Env
 
 
 NIL = []
 
 
-class F:
-    """Representation of a 'function-object' with lexical scoping."""
+def procedure(params, body, env):
+    """
+    User defined procedure.
 
-    def __init__(self, args, body, env):
-        """
-        Initialize function object.
-        Passing env allows to use lexical scoping.
-        """
-
-        self._body = body
-        self._args = args
-        self._env = env
-
-    def __repr__(self):
-        return '(lambda ({}))'.format(self._args)
-
-    def __call__(self, *args):
-        """Implementing 'function-object' as a functor."""
-
-        env = Env(names=self._args, values=args, outer=self._env)
-        return evaluate(self._body, env)
+    Uses lexical scoping (lookup names in the place it was defined).
+    """
+    return lambda *args: evaluate_expression(body, Env(params, args, env))
 
 
 def to_bool(value):
@@ -34,7 +22,7 @@ def to_bool(value):
     return False if value in falsy else True
 
 
-def evaluate(exp, env=default):
+def evaluate_expression(exp, env=default):
     """
     Evaluate expression exp in environment env.
 
@@ -42,9 +30,22 @@ def evaluate(exp, env=default):
     Environment as an instance of Env class.
 
     Example:
-    > evaluate([+, 2, [-, 4, 2]], Env())  # Passing empty env
+    > evaluate_expression([+, 2, [-, 4, 2]], Env())  # Passing empty env
     >> 4
     """
+
+    def function_call(exp):
+        """
+        Handle function call.
+
+        In lisp every s-expression is a function-call.
+        First element is a function name (or a function itself).
+        Other elements are argumets to that function.
+        """
+        func, *args = exp
+        function_to_call = evaluate_expression(func, env)
+        args = [evaluate_expression(x, env) for x in args]
+        return function_to_call(*args)
 
     def let(bindings, body):
         """
@@ -54,9 +55,9 @@ def evaluate(exp, env=default):
         Second, evaluate body under extended environment.
         """
         names = [b[0] for b in bindings]
-        values = [evaluate(b[1], env) for b in bindings]
+        values = [evaluate_expression(b[1], env) for b in bindings]
         new_env = Env(names=names, values=values, outer=env)
-        return evaluate(body, new_env)
+        return evaluate_expression(body, new_env)
 
     def define(name, exp):
         """
@@ -67,7 +68,7 @@ def evaluate(exp, env=default):
 
         Return V as a result.
         """
-        val = evaluate(exp, env)
+        val = evaluate_expression(exp, env)
         env.update({name: val})
         return val
 
@@ -81,10 +82,10 @@ def evaluate(exp, env=default):
 
         Return V' as a result.
         """
-        predicate_value = to_bool(evaluate(predicate, env))
+        predicate_value = to_bool(evaluate_expression(predicate, env))
 
-        return (evaluate(if_true_exp, env) if predicate_value
-                else evaluate(if_false_exp, env))
+        return (evaluate_expression(if_true_exp, env) if predicate_value
+                else evaluate_expression(if_false_exp, env))
 
     def set_(name, exp):
         """
@@ -95,7 +96,7 @@ def evaluate(exp, env=default):
 
         Note: works ONLY for symbols/name/envs. Lists are immutable.
         """
-        value = evaluate(exp, env)
+        value = evaluate_expression(exp, env)
         env.set(name, value)
         return value
 
@@ -108,7 +109,7 @@ def evaluate(exp, env=default):
 
         Return modified exp.
         """
-        return [evaluate(datum, env) if is_unquote(datum) else datum
+        return [evaluate_expression(datum, env) if is_unquote(datum) else datum
                 for datum in exp]
 
     def match(exp, first_term):
@@ -144,14 +145,6 @@ def evaluate(exp, env=default):
     def is_set(exp):
         return match(exp, 'set!')
 
-    def is_binding(exp):
-        return isinstance(exp, str)
-
-    def function_call(exp):
-        function = env.lookup(exp[0])
-        args = [evaluate(x, env) for x in exp[1:]]
-        return function(*args)
-
     # Kinda of pattern-matching.
     if not exp:
         return NIL
@@ -164,7 +157,7 @@ def evaluate(exp, env=default):
         return datum
     elif is_unquote(exp):
         _, datum = exp
-        return evaluate(datum, env)
+        return evaluate_expression(datum, env)
     elif is_quasiqoute(exp):
         _, datum = exp
         return quasiquoute(datum)
@@ -182,6 +175,6 @@ def evaluate(exp, env=default):
         return define(name, exp)
     elif is_lambda(exp):
         _, args, body = exp
-        return F(args, body, env)
+        return procedure(args, body, env)
     else:
         return function_call(exp)

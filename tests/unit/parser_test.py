@@ -4,19 +4,21 @@ from lisp.parser import parse
 
 
 PROGRAM_2_AST = [
-    ('()', []),
+    ('()', [[]]),
     ('(+ 2 3.2)',
-     ['+', 2, 3.2]),
+     [['+', 2, 3.2]]),
     ('(+ 2 (- 4 (* 2 1)))',
-     ['+', 2, ['-', 4, ['*', 2, 1]]]),
+     [['+', 2, ['-', 4, ['*', 2, 1]]]]),
     ('(cons 1 (cons 2 (cons 3 ())))',
-     ['cons', 1, ['cons', 2, ['cons', 3, []]]]),
+     [['cons', 1, ['cons', 2, ['cons', 3, []]]]]),
     ('(car (cons 1 (cons 2 ())))',
-     ['car', ['cons', 1, ['cons', 2, []]]]),
+     [['car', ['cons', 1, ['cons', 2, []]]]]),
     ('(cdr (cons 1 (cons 2 ())))',
-     ['cdr', ['cons', 1, ['cons', 2, []]]]),
+     [['cdr', ['cons', 1, ['cons', 2, []]]]]),
     ('(let ((x (cons 1 (cons 2)))) (valof x))',
-    ['let', [['x', ['cons', 1, ['cons', 2]]]], ['valof', 'x']])
+    [['let', [['x', ['cons', 1, ['cons', 2]]]], ['valof', 'x']]]),
+    ('(let\n((x (cons 1 (cons 2))))\n(valof x))(define r 12)',
+    [['let', [['x', ['cons', 1, ['cons', 2]]]], ['valof', 'x']], ['define', 'r', 12]]),
 ]
 
 
