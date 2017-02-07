@@ -15,13 +15,6 @@ def procedure(params, body, env):
     return lambda *args: evaluate_expression(body, Env(params, args, env))
 
 
-def to_bool(value):
-    """Convert arbitary value to boolean."""
-    falsy = ['false', [], 0]
-
-    return False if value in falsy else True
-
-
 def evaluate_expression(exp, env=default):
     """
     Evaluate expression exp in environment env.
@@ -82,7 +75,7 @@ def evaluate_expression(exp, env=default):
 
         Return V' as a result.
         """
-        predicate_value = to_bool(evaluate_expression(predicate, env))
+        predicate_value = evaluate_expression(predicate, env)
 
         return (evaluate_expression(if_true_exp, env) if predicate_value
                 else evaluate_expression(if_false_exp, env))
@@ -112,6 +105,17 @@ def evaluate_expression(exp, env=default):
         return [evaluate_expression(datum, env) if is_unquote(datum) else datum
                 for datum in exp]
 
+    def cond(clauses):
+        """
+        TODO
+        """
+        for clause in clauses:
+            predicate_exp, value_exp = clause
+            if evaluate_expression(predicate_exp, env):
+                print("HERE {}".format(clause))
+                return evaluate_expression(value_exp, env)
+        return NIL
+
     def match(exp, first_term):
         return isinstance(exp, list) and exp[0] == first_term
 
@@ -132,6 +136,9 @@ def evaluate_expression(exp, env=default):
 
     def is_unquote(exp):
         return match(exp, 'unquote')
+
+    def is_cond(exp):
+        return match(exp, 'cond')
 
     def is_define(exp):
         return match(exp, 'define')
@@ -161,6 +168,9 @@ def evaluate_expression(exp, env=default):
     elif is_quasiqoute(exp):
         _, datum = exp
         return quasiquoute(datum)
+    elif is_cond(exp):
+        clauses = exp[1:]
+        return cond(clauses)
     elif is_if(exp):
         _, predicate, true_branch, false_branch = exp
         return if_(predicate, true_branch, false_branch)

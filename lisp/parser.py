@@ -17,14 +17,18 @@ def tokenize(program):
 
 def atomize(token):
     """Try to convert token to numeric literal."""
-
-    try:
-        return int(token)
-    except ValueError:
+    if token == '#f':
+        return False
+    elif token == '#t':
+        return True
+    else:
         try:
-            return float(token)
+            return int(token)
         except ValueError:
-            return token
+            try:
+                return float(token)
+            except ValueError:
+                return token
 
 
 def read(tokens):
