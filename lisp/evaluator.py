@@ -112,7 +112,6 @@ def evaluate_expression(exp, env=default):
         for clause in clauses:
             predicate_exp, value_exp = clause
             if evaluate_expression(predicate_exp, env):
-                print("HERE {}".format(clause))
                 return evaluate_expression(value_exp, env)
         return NIL
 
