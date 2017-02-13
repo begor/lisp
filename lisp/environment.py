@@ -66,6 +66,7 @@ def builtins():
         '>=': operator.ge,
         '<=': operator.le,
         '=': operator.eq,
+        'abs': abs,
         'and': operator.and_,
         'or': operator.or_,
         'car': lambda alist: alist[0],
