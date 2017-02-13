@@ -107,7 +107,12 @@ def evaluate_expression(exp, env=default):
 
     def cond(clauses):
         """
-        TODO
+        Handle 'cond' special form.
+        
+        Iterates over list of clauses in order and evaluates it.
+        If one evaluates to true, evaluate its corresponding expression to result and return it.
+        
+        If no clause evaluates to true, return NIL.
         """
         for clause in clauses:
             predicate_exp, value_exp = clause
