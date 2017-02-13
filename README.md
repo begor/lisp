@@ -30,7 +30,7 @@ mbpro:lisp begor$ cat examples/fact.lisp
 (fact 100)
 
 mbpro:lisp begor$ python lisp examples/fact.lisp
-93326215443944152681699238... 
+93326215443944152681699238...
 ```
 - Tests
 ```

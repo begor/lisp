@@ -85,6 +85,30 @@ expression2result = [
             ((= 3 2) -1)
             (#t 1))
      """, 1),
+    ("""
+     (filter (lambda (x) (= x 2)) (list 1 2 3 4 5))
+     """, [2]),
+    ("""
+     (filter (lambda (x) (> x 20)) (list 1 2 3 4 5))
+     """, []),
+    ("""
+     (map (lambda (x) (* x 2)) (list 1 2 3 4 5))
+     """, [2, 4, 6, 8, 10]),
+    ("""
+     (fold + (list 1 2 3 4 5))
+     """, 15),
+    ("""
+     (sum (list 1 2 3 4 5))
+     """, 15),
+    ("""
+     (mul (list 1 2 3))
+     """, 6),
+    ("""
+     (define map (lambda (fn xs)
+                    (reverse (fold (lambda (xs x) (cons (fn x) xs)) xs ()))))
+
+     (map (lambda (x) (* x 2)) (list 1 2 3 4 5))
+     """, [2, 4, 6, 8, 10]),
 ]
 
 
