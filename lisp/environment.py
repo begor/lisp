@@ -4,7 +4,7 @@ import operator
 
 class Env(dict):
     """
-    Environment for some computation.
+    Computational environment for some expression.
 
     Implemented with recursive composition -
     each environment has the outer environment.
@@ -16,10 +16,10 @@ class Env(dict):
     3) O.O.lookup(N)
     ...
 
-    Until we find N in some environment.
+    Until we find N in some environment or fail with exception.
     """
 
-    lookup_error_msg = '{} not found in Env{}'
+    lookup_error_msg = '{} not found in Env<{}>'
 
     def __init__(self, names=(), values=(), outer=None):
         self.update(zip(names, values))
@@ -79,6 +79,12 @@ def builtins():
         'number?': lambda term: isinstance(term, (int, float)),
         'symbol?': lambda term: isinstance(term, str),
         'function?': callable,
+        'map': lambda fn, xs: [fn(x) for x in xs],
+        'filter': lambda fn, xs: [x for x in xs if fn(x)],
+        'reverse': lambda xs: xs[::-1],
+        'fold': functools.reduce,
+        'sum': sum,
+        'mul': functools.partial(functools.reduce, operator.mul),
         'eq?': operator.eq,
     })
 
